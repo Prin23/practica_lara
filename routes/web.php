@@ -14,3 +14,5 @@
 Route::get('/', function () {
     return view('home');
 });
+
+Route::get('cao_usuario', 'CaoUsuarioController@listUsersByType')->name('caoUsuario.list');
