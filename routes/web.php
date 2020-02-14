@@ -16,3 +16,5 @@ Route::get('/', function () {
 });
 
 Route::get('cao_usuario', 'CaoUsuarioController@listUsersByType')->name('caoUsuario.list');
+
+Route::post('relatorio', 'CaoFacturaController@relatorio')->name('caoFactura.relatorio');

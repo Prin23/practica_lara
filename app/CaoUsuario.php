@@ -17,4 +17,22 @@ class CaoUsuario extends Model
     	//Retorna la relacion entre los modelos, mediante el campo "co_usuario"
     	return $this->hasOne(PermissaoSistema::class, 'co_usuario', 'co_usuario');
     }
+
+    /*
+    * Metodo relacional con el modelo CaoSalario
+    */
+    public function salary()
+    {
+        //Retorna la relacion entre los modelos, mediante el campo "co_usuario"
+        return $this->hasOne(CaoSalario::class, 'co_usuario', 'co_usuario');
+    }
+
+    /*
+    * Metodo relacional con el modelo CaoOs
+    */
+    public function os()
+    {
+        //Retorna la relacion entre los modelos, mediante el campo "co_os"
+        return $this->hasMany(CaoOs::class, 'co_usuario', 'co_usuario');
+    }
 }

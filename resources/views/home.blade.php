@@ -2,6 +2,15 @@
 
 @section('title', 'CAOL - Controle de Atividades Online - Agence Interativa')
 
+@section('css')
+	<style type="text/css">
+		.overflow-table {
+			max-height: 70vh;
+			overflow-y: scroll;
+		}
+	</style>
+@endsection
+
 @section('content')
 	<div class="row">
 		<div class="col-md-12">
@@ -26,15 +35,15 @@
 				<label>Período</label>
 				
 				<select name="start_month" class="ml-1">
-					<option value="1">Jan</option>
-					<option value="2">Fev</option>
-					<option value="3">Mar</option>
-					<option value="4">Abr</option>
-					<option value="5">Mai</option>
-					<option value="6">Jun</option>
-					<option value="7">Jul</option>
-					<option value="8">Ago</option>
-					<option value="9">Set</option>
+					<option value="01">Jan</option>
+					<option value="02">Fev</option>
+					<option value="03">Mar</option>
+					<option value="04">Abr</option>
+					<option value="05">Mai</option>
+					<option value="06">Jun</option>
+					<option value="07">Jul</option>
+					<option value="08">Ago</option>
+					<option value="09">Set</option>
 					<option value="10">Out</option>
 					<option value="11">Nov</option>
 					<option value="12">Dec</option>
@@ -51,15 +60,15 @@
 				<label> a </label>
 				
 				<select name="end_month" class="ml-1">
-					<option value="1">Jan</option>
-					<option value="2">Fev</option>
-					<option value="3">Mar</option>
-					<option value="4">Abr</option>
-					<option value="5">Mai</option>
-					<option value="6">Jun</option>
-					<option value="7">Jul</option>
-					<option value="8">Ago</option>
-					<option value="9">Set</option>
+					<option value="01">Jan</option>
+					<option value="02">Fev</option>
+					<option value="03">Mar</option>
+					<option value="04">Abr</option>
+					<option value="05">Mai</option>
+					<option value="06">Jun</option>
+					<option value="07">Jul</option>
+					<option value="08">Ago</option>
+					<option value="09">Set</option>
 					<option value="10">Out</option>
 					<option value="11">Nov</option>
 					<option value="12">Dec</option>
@@ -76,9 +85,18 @@
 		</div>
 
 		<div class="col-md-4 d-flex justify-content-end">
-			<button id="relatorio" type="button" class="btn btn-secondary mr-1">Relatório</button>
-			<button id="grafico" type="button" class="btn btn-secondary mr-1">Gráfico</button>
-			<button id="pizza" type="button" class="btn btn-secondary">Pizza</button>	
+			<button id="relatorio" type="button" class="btn btn-secondary mr-1">
+				<i class="fa fa-file-alt"></i>
+				Relatório
+			</button>
+			<button id="grafico" type="button" class="btn btn-secondary mr-1">
+				<i class="fa fa-chart-bar"></i>
+				Gráfico
+			</button>
+			<button id="pizza" type="button" class="btn btn-secondary">
+				<i class="fa fa-chart-pie"></i>
+				Pizza
+			</button>	
 		</div>
 	</div>
 
@@ -86,10 +104,51 @@
 		<div class="col-md-12">
 			<div class="tab-content" id="comercialContent">
 				<div class="tab-pane fade show active" id="consultorContent" role="tabpanel" aria-labelledby="consultor-tab">
-					<h2>Consultores</h2>
+					<h3>Consultores</h3>
+					
+					<div class="row">
+						<div class="col-md-5 overflow-table">
+							<table id="consultores-table" class="my-3 table table-hover" width="100">
+								<thead>
+									<tr>
+										<th width="10">
+											<i class="fa fa-check"></i>
+										</th>
+										<th>Nome Completo</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td colspan="2" class="text-center">Não há dados para mostrar</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
+
 				<div class="tab-pane fade" id="clienteContent" role="tabpanel" aria-labelledby="cliente-tab">
-					<h2>Clientes</h2>
+					<h3>Clientes</h3>
+
+					<div class="row">
+						<div class="col-md-5 overflow-table">
+							<table id="clientes-table" class="my-3 table table-hover" width="100">
+								<thead>
+									<tr>
+										<th width="10">
+											<i class="fa fa-check"></i>
+										</th>
+										<th>Nome Completo</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td colspan="2" class="text-center">Não há dados para mostrar</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -99,5 +158,75 @@
 @section('scripts')
 	<script type="text/javascript">
 		$('#comercial').addClass('active');
+
+		$(document).ready(function() {
+			{{-- Cuando el documento cargue ejecuto la funcion que carga datos en la tabla de consultores --}}
+			reloadConsultoresTable();
+
+			$('#relatorio').on('click', function(e) {
+				if($('#consultorTab').hasClass('active')) {
+					let dataForm = {};
+
+					$('#period select').each(function(i, el) {
+						dataForm[el.name] = el.value;
+					});
+
+					let dataTable = $('[name="consultoresCo[]"]:checked').map(function(){
+								    	return this.value;
+								    }).get();
+
+					dataForm['co_usuarios'] = dataTable;
+
+					calculateRelatorio(dataForm);
+				} else if($('#clienteTab').hasClass('active')) {
+					console.log('debo ejecutar la peticion en relacion a los clientes');
+				}
+			});
+		});
+
+		{{-- Esta funcion se encarga de vacias los datos en la tabla de consultores --}}
+		function reloadConsultoresTable() {
+			$('#consultores-table tbody').html(`<tr>
+				<td colspan="2" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando dados</td>
+			</tr>`);
+
+			$.ajax({
+				headers: {
+			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			    },
+				url: "{{ route('caoUsuario.list') }}",
+				type: 'GET'
+			}).done(function(resp) {
+				let html = '';
+
+				resp.users.forEach(function(e, i) {
+					html += `<tr>
+						<td>
+							<input type="checkbox" name="consultoresCo[]" value="${e.co_usuario}" multiple>
+						</td>
+						<td>${e.no_usuario}</td>
+					</tr>`;
+				});
+
+				$('#consultores-table tbody').html(html);
+			}).fail(function(resp) {
+				$('#consultores-table tbody').html(`<tr><td colspan="2" class="text-center">Não há dados para mostrar</td></tr>`);
+			});
+		}
+
+		function calculateRelatorio(data) {
+			$.ajax({
+				headers: {
+			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			    },
+				url: "{{ route('caoFactura.relatorio') }}",
+				type: 'POST',
+				data: data
+			}).done(function(resp) {
+				console.log(resp);
+			}).fail(function(resp) {
+
+			});
+		}
 	</script>
 @endsection
