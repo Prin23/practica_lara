@@ -18,3 +18,4 @@ Route::get('/', function () {
 Route::get('cao_usuario', 'CaoUsuarioController@listUsersByType')->name('caoUsuario.list');
 
 Route::post('relatorio', 'CaoFacturaController@relatorio')->name('caoFactura.relatorio');
+Route::post('chart-pie', 'CaoFacturaController@chartPie')->name('caoFactura.chart-pie');

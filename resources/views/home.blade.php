@@ -159,6 +159,7 @@
 @endsection
 
 @section('scripts')
+	<script src="{{ asset('plugins/chartjs/Chart.min.js') }}"></script>
 	<script type="text/javascript">
 		$('#comercial').addClass('active');
 
@@ -167,6 +168,8 @@
 			reloadConsultoresTable();
 
 			$('#relatorio').on('click', function(e) {
+				e.preventDefault();
+
 				if($('#consultorTab').hasClass('active')) {
 					let dataForm = {};
 
@@ -184,6 +187,28 @@
 				} else if($('#clienteTab').hasClass('active')) {
 					console.log('debo ejecutar la peticion en relacion a los clientes');
 				}
+			});
+
+			$('#pizza').on('click', function(e) {
+				e.preventDefault();
+				let dataForm = {};
+
+				if($('#consultorTab').hasClass('active')) {
+
+					$('#period select').each(function(i, el) {
+						dataForm[el.name] = el.value;
+					});
+
+					let dataTable = $('[name="consultoresCo[]"]:checked').map(function(){
+								    	return this.value;
+								    }).get();
+
+					dataForm['co_usuarios'] = dataTable;
+				} else if($('#clienteTab').hasClass('active')) {
+					console.log('debo ejecutar la peticion en relacion a los clientes');
+				}
+
+				drawPizza(dataForm, 'consultores');
 			});
 		});
 
@@ -281,6 +306,37 @@
 			} else if (type == 'clientes') {
 
 			}
+		}
+
+		function drawPizza(data, $type = 'consultores') {
+			$.ajax({headers: {
+			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			    },
+				url: "{{ route('caoFactura.chart-pie') }}",
+				type: 'POST',
+				data: data
+			}).done(function(resp) {
+				$('#consultores-info').html(`<canvas id="chart-area"></canvas>`);
+
+				let data = {
+					datasets: {
+						data: [],
+						backgroundColor: []
+					},
+					labels: []
+				};
+
+				for (var i in resp) {
+					data.datasets.data.push(resp[i].value);
+					data.datasets.backgroundColor.push(resp[i].color);
+					data.labels.push(resp[i].label);
+				}
+
+				console.log(data, resp);
+
+			}).fail(function(resp){
+				console.log(resp);
+			});
 		}
 	</script>
 @endsection

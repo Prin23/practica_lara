@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\CaoFactura;
+use Faker\Generator as Faker;
 use Illuminate\Http\Request;
 
 class CaoFacturaController extends Controller
@@ -83,10 +84,10 @@ class CaoFacturaController extends Controller
     				$multiple ++;
 
     				//Formateo los valores por mes
-					$v['receita'] = $this->format_number($v['receita']);
-					$v['fixo'] = $this->format_number($v['fixo']);
-					$v['comissao'] = $this->format_number($v['comissao']);
-					$v['lucro'] = $this->format_number($v['lucro']);
+					$v['receita'] = $this->formatNumber($v['receita']);
+					$v['fixo'] = $this->formatNumber($v['fixo']);
+					$v['comissao'] = $this->formatNumber($v['comissao']);
+					$v['lucro'] = $this->formatNumber($v['lucro']);
     				
     				$user[$k] = $v;
     			}
@@ -96,10 +97,10 @@ class CaoFacturaController extends Controller
     		$multiple != 0 ? $user['total_fixo'] *= $multiple : $user['total_fixo'] *= 1;
 
     		//Formateo los totales
-    		$user['total_receita'] = $this->format_number($user['total_receita']);
-    		$user['total_fixo'] = $this->format_number($user['total_fixo']);
-    		$user['total_comissao'] = $this->format_number($user['total_comissao']);
-    		$user['total_lucro'] = $this->format_number($user['total_lucro']);
+    		$user['total_receita'] = $this->formatNumber($user['total_receita']);
+    		$user['total_fixo'] = $this->formatNumber($user['total_fixo']);
+    		$user['total_comissao'] = $this->formatNumber($user['total_comissao']);
+    		$user['total_lucro'] = $this->formatNumber($user['total_lucro']);
 
     		//Ordeno el arreglo por key, para mostrar la informacion de forma ordenada
     		ksort($user);
@@ -110,7 +111,58 @@ class CaoFacturaController extends Controller
     	return response()->json($data, 200);
     }
 
-    private function format_number($number)
+    public function chartPie(Request $request)
+    {
+    	//Arreglos donde guardare toda la informacion formateada
+    	$data_users = [];
+    	$total = 0; // El total representa el 100% en base al cual se calculara el porcentaje de participacion de cada consultor
+    	$faker = new Faker;//Implemento faker para generar colores
+
+    	//Creo objetos carbon para manipular las fechas de comienzo y fin
+    	$date_start = Carbon::createFromFormat('Y-m', $request->get('start_year').'-'.$request->get('start_month'))->startOfMonth();
+    	$date_end = Carbon::createFromFormat('Y-m', $request->get('end_year').'-'.$request->get('end_month'))->endOfMonth();
+
+    	/*Selecciono las facturas segun los criterios:
+    	* 1) Que esten dentro del rango de fechas de inicio y fin
+    	* 2) Que pertenezcan a los usuarios seleccionados
+    	*/
+    	$invoices = CaoFactura::whereBetween('data_emissao', [$date_start->format('Y-m-d'), $date_end->format('Y-m-d')])
+    		->whereHas('os', function($query) use ($request) {
+    			$query->whereIn('co_usuario', $request->get('co_usuarios'));
+    		})
+    		->get();
+
+    	//Cargo las relaciones de las facturas obtenidas
+    	$invoices->load('os.user');
+
+    	//Recorro las facturas mientras formateo la data
+    	$invoices->each(function($invoice) use (&$data_users, &$total, $faker) {
+    		//Calculo de "Receita Liquida"
+    		$receita = $invoice->valor - ($invoice->valor * ($invoice->total_imp_inc/100));
+
+    		//Si el usuario no esta en la matriz seteo los valores inciales
+    		if (!array_key_exists($invoice->os->co_usuario, $data_users)) {
+    			$data_users[$invoice->os->co_usuario] = ['value' => $receita, 'label' => $invoice->os->user->no_usuario, 'color' => $faker->hexcolor];
+    		} else {
+    			$data_users[$invoice->os->co_usuario]['value'] += $receita;
+    		}
+
+    		$total += $receita;
+
+    	});
+
+    	//calculo de porcentajes
+    	foreach ($data_users as $key => $user) {
+    		$user['value'] = ($user['value'] * 100)/$total;
+
+    		$data_users[$key] = $user;
+    	}
+
+
+    	return response()->json($data_users, 200);
+    }
+
+    private function formatNumber($number)
     {
     	if ($number < 0) {
 			$number = '- R$ '.number_format(abs($number), 2, ',', '.');
