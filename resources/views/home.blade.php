@@ -124,6 +124,9 @@
 								</tbody>
 							</table>
 						</div>
+						<div id="consultores-info" class="col-md-7 overflow-table">
+							
+						</div>
 					</div>
 				</div>
 
@@ -177,7 +180,7 @@
 
 					dataForm['co_usuarios'] = dataTable;
 
-					calculateRelatorio(dataForm);
+					calculateRelatorio(dataForm, 'consultores');
 				} else if($('#clienteTab').hasClass('active')) {
 					console.log('debo ejecutar la peticion en relacion a los clientes');
 				}
@@ -214,7 +217,8 @@
 			});
 		}
 
-		function calculateRelatorio(data) {
+		{{-- Esta funcion ejecuta la peticion para el calculo del relatorio --}}
+		function calculateRelatorio(data, type = 'consultores') {
 			$.ajax({
 				headers: {
 			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -223,10 +227,60 @@
 				type: 'POST',
 				data: data
 			}).done(function(resp) {
-				console.log(resp);
+				drawRelatorio(resp, type);
 			}).fail(function(resp) {
-
+				console.log(resp);
 			});
+		}
+
+		{{-- Esta funcion dibuja la tabla del relatorio dependiendo del tipo de usuario (clientes o consultores) --}}
+		function drawRelatorio(data, type) {
+			if (type == 'consultores') {
+				let html = ``;
+				
+				for (var i in data) {
+					html += `<table class="table table-hover" width="100">
+						<thead>
+							<tr><th colspan="5">${data[i].no_usuario}</th></tr>
+							<tr>
+								<th class="text-center">Período</th>
+								<th class="text-center">Receita Líquida</th>
+								<th class="text-center">Custo Fixo</th>
+								<th class="text-center">Comissão</th>
+								<th class="text-center">Lucro</th>
+							</tr>
+						</thead>
+						<tbody>`;
+
+					for (var x in data[i]) {
+						if (data[i][x] instanceof Object) {
+							html += `<tr>
+								<td>${data[i][x].mes}</td>
+								<td class="text-left">${data[i][x].receita}</td>
+								<td class="text-left">${data[i][x].fixo}</td>
+								<td class="text-left">${data[i][x].comissao}</td>
+								<td class="text-left">${data[i][x].lucro}</td>
+							</tr>`;
+						}
+					}
+
+					html +=`</tbody>
+						<tfoot>
+							<tr>
+								<td><strong>SALDO</strong></td>
+								<td class="text-left">${data[i].total_receita}</td>
+								<td class="text-left">${data[i].total_fixo}</td>
+								<td class="text-left">${data[i].total_comissao}</td>
+								<td class="text-left">${data[i].total_lucro}</td>
+							</tr>
+						</tfoot>
+					</table>`;
+				}
+
+				$('#consultores-info').html(html);
+			} else if (type == 'clientes') {
+
+			}
 		}
 	</script>
 @endsection
