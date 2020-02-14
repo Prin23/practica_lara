@@ -3,6 +3,7 @@
 @section('title', 'CAOL - Controle de Atividades Online - Agence Interativa')
 
 @section('css')
+	<link rel="stylesheet" href="{{ asset('plugins/c3/c3.min.css') }}">
 	<style type="text/css">
 		.overflow-table {
 			max-height: 70vh;
@@ -125,7 +126,7 @@
 							</table>
 						</div>
 						<div id="consultores-info" class="col-md-7 overflow-table">
-							
+							<canvas id="chart-area"></canvas>
 						</div>
 					</div>
 				</div>
@@ -159,7 +160,9 @@
 @endsection
 
 @section('scripts')
-	<script src="{{ asset('plugins/chartjs/Chart.min.js') }}"></script>
+	<script src="{{ asset('plugins/raphael/raphael.min.js') }}"></script>
+	<script src="{{ asset('plugins/c3/d3.min.js') }}"></script>
+	<script src="{{ asset('plugins/c3/c3.min.js') }}"></script>
 	<script type="text/javascript">
 		$('#comercial').addClass('active');
 
@@ -209,6 +212,28 @@
 				}
 
 				drawPizza(dataForm, 'consultores');
+			});
+
+			$('#grafico').on('click', function(e) {
+				e.preventDefault();
+				let dataForm = {};
+
+				if($('#consultorTab').hasClass('active')) {
+
+					$('#period select').each(function(i, el) {
+						dataForm[el.name] = el.value;
+					});
+
+					let dataTable = $('[name="consultoresCo[]"]:checked').map(function(){
+								    	return this.value;
+								    }).get();
+
+					dataForm['co_usuarios'] = dataTable;
+				} else if($('#clienteTab').hasClass('active')) {
+					console.log('debo ejecutar la peticion en relacion a los clientes');
+				}
+
+				drawGrafico(dataForm, 'consultores');
 			});
 		});
 
@@ -308,6 +333,7 @@
 			}
 		}
 
+		{{-- Esta funcion dibuja el grafico de torta --}}
 		function drawPizza(data, $type = 'consultores') {
 			$.ajax({headers: {
 			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -316,24 +342,74 @@
 				type: 'POST',
 				data: data
 			}).done(function(resp) {
-				$('#consultores-info').html(`<canvas id="chart-area"></canvas>`);
+				$('#consultores-info').html(`<div id="chart-area"></div>`);
+				var data = {
+					columns: [],
+					type: 'donut',
+					tooltip: {
+						show: true
+					}
+				};
 
-				let data = {
-					datasets: {
-						data: [],
-						backgroundColor: []
+				var color = {
+					pattern: [],
+				}
+
+				for (var i in resp) {
+					data.columns.push([resp[i].label, resp[i].value]);
+					color.pattern.push(resp[i].color);
+				}
+
+				var chart = c3.generate({
+					bindto: '#chart-area',
+					data: data,
+					donut: {
+						label: {
+					   		show: true
+						},
+						width: 150,
 					},
-					labels: []
+					color: color
+				});
+			}).fail(function(resp){
+				console.log(resp);
+			});
+		}
+
+		{{-- Esta funcion dibuja el grafico de barras --}}
+		function drawGrafico(data, $type = 'consultores') {
+			$.ajax({headers: {
+			        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			    },
+				url: "{{ route('caoFactura.chart-bar') }}",
+				type: 'POST',
+				data: data
+			}).done(function(resp) {
+				$('#consultores-info').html(`<div id="chart-area"></div>`);
+
+				var data = {
+					columns: [],
+					type: 'bar',
+					tooltip: {
+						show: true
+					},
+					types: {
+						avg: 'line'
+					}
 				};
 
 				for (var i in resp) {
-					data.datasets.data.push(resp[i].value);
-					data.datasets.backgroundColor.push(resp[i].color);
-					data.labels.push(resp[i].label);
+					if (i != 'mes') {
+						data.columns.push(resp[i]);
+					}
 				}
 
-				console.log(data, resp);
+				console.log(data);
 
+				var chart = c3.generate({
+					bindto: '#chart-area',
+					data: data
+				});
 			}).fail(function(resp){
 				console.log(resp);
 			});

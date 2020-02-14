@@ -19,3 +19,4 @@ Route::get('cao_usuario', 'CaoUsuarioController@listUsersByType')->name('caoUsua
 
 Route::post('relatorio', 'CaoFacturaController@relatorio')->name('caoFactura.relatorio');
 Route::post('chart-pie', 'CaoFacturaController@chartPie')->name('caoFactura.chart-pie');
+Route::post('chart-bar', 'CaoFacturaController@chartBar')->name('caoFactura.chart-bar');
