@@ -24,7 +24,9 @@ class CaoUsuario extends Model
     public function salary()
     {
         //Retorna la relacion entre los modelos, mediante el campo "co_usuario"
-        return $this->hasOne(CaoSalario::class, 'co_usuario', 'co_usuario');
+        return $this->hasOne(CaoSalario::class, 'co_usuario', 'co_usuario')->withDefault([
+            'brut_salario' => 0
+        ]);
     }
 
     /*
