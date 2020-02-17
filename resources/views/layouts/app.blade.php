@@ -17,11 +17,11 @@
 
 		<div class="container-fluid">
 			<div class="row flex-xl-nowrap">
-				<div class="col-md-3 col-xl-2 bd-sidebar">
+				<div class="col-lg-3 col-xl-2 bd-sidebar">
 					@include('partials.sidebar')
 				</div>
 
-				<main class="col-md-9 col-xl-10 py-md-3 bd-content" role="main">
+				<main class="col-lg-9 col-xl-10 py-md-3 bd-content" role="main">
 					@yield('content')
 				</main>
 			</div>

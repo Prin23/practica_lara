@@ -31,7 +31,7 @@
 	</div>
 
 	<div class="row my-1">
-		<div class="col-md-8">
+		<div class="col-lg-8 col-sm-6">
 			<form id="period" class="form-inline">
 				<label>Período</label>
 				
@@ -85,7 +85,7 @@
 			</form>
 		</div>
 
-		<div class="col-md-4 d-flex justify-content-end">
+		<div class="col-lg-4 col-sm-6 d-flex justify-content-end">
 			<button id="relatorio" type="button" class="btn btn-secondary mr-1">
 				<i class="fa fa-file-alt"></i>
 				Relatório
@@ -306,10 +306,10 @@
 						if (data[i][x] instanceof Object) {
 							html += `<tr>
 								<td>${data[i][x].mes}</td>
-								<td class="text-left">${data[i][x].receita}</td>
-								<td class="text-left">${data[i][x].fixo}</td>
-								<td class="text-left">${data[i][x].comissao}</td>
-								<td class="text-left">${data[i][x].lucro}</td>
+								<td class="text-right">${data[i][x].receita}</td>
+								<td class="text-right">${data[i][x].fixo}</td>
+								<td class="text-right">${data[i][x].comissao}</td>
+								<td class="text-right">${data[i][x].lucro}</td>
 							</tr>`;
 						}
 					}
@@ -318,10 +318,10 @@
 						<tfoot>
 							<tr>
 								<td><strong>SALDO</strong></td>
-								<td class="text-left">${data[i].total_receita}</td>
-								<td class="text-left">${data[i].total_fixo}</td>
-								<td class="text-left">${data[i].total_comissao}</td>
-								<td class="text-left">${data[i].total_lucro}</td>
+								<td class="text-right">${data[i].total_receita}</td>
+								<td class="text-right">${data[i].total_fixo}</td>
+								<td class="text-right">${data[i].total_comissao}</td>
+								<td class="text-right">${data[i].total_lucro}</td>
 							</tr>
 						</tfoot>
 					</table>`;
