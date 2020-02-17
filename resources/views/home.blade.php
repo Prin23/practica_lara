@@ -126,7 +126,7 @@
 							</table>
 						</div>
 						<div id="consultores-info" class="col-md-7 overflow-table">
-							<canvas id="chart-area"></canvas>
+							<div id="chart-area"></div>
 						</div>
 					</div>
 				</div>
